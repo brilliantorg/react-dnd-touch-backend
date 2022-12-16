@@ -4,6 +4,7 @@
  */
 'use strict';
 
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -11,7 +12,6 @@ exports.TouchBackend = void 0;
 exports.default = createTouchBackend;
 var _invariant = _interopRequireDefault(require("invariant"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -20,6 +20,12 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
 function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 function getEventClientTouchOffset(e) {
   if (e.targetTouches.length === 1) {
     return getEventClientOffset(e.targetTouches[0]);
@@ -71,41 +77,26 @@ function eventShouldEndDrag(e) {
   // bit field unset if the left mouse button has been released
   return e.buttons === undefined || (e.buttons & MouseButtons.Left) === 0;
 }
-
-// Polyfill for document.elementsFromPoint
-var elementsFromPoint = (typeof document !== 'undefined' && document.elementsFromPoint || function (x, y) {
-  if (document.msElementsFromPoint) {
-    // msElementsFromPoint is much faster but returns a node-list, so convert it to an array
-    var msElements = document.msElementsFromPoint(x, y);
-    return msElements && Array.prototype.slice.call(msElements, 0);
-  }
-  var elements = [],
-    previousPointerEvents = [],
-    current,
-    i,
-    d;
-
-  // get all elements via elementFromPoint, and remove them from hit-testing in order
-  while ((current = document.elementFromPoint(x, y)) && elements.indexOf(current) === -1 && current !== null) {
-    // push the element and its current style
-    elements.push(current);
-    previousPointerEvents.push({
-      value: current.style.getPropertyValue('pointer-events'),
-      priority: current.style.getPropertyPriority('pointer-events')
-    });
-
-    // add "pointer-events: none", to get to the underlying element
-    current.style.setProperty('pointer-events', 'none', 'important');
-  }
-
-  // restore the previous pointer-events values
-  for (i = previousPointerEvents.length; d = previousPointerEvents[--i];) {
-    elements[i].style.setProperty('pointer-events', d.value ? d.value : '', d.priority);
-  }
-
-  // return our results
-  return elements;
-}).bind(typeof document !== 'undefined' ? document : null);
+var elementsFromPoint = function (x, y) {
+  /*
+   * Instead of just getting document.elementsFromPoint
+   * Instead, find all the shadowroots inside the document
+   * and return the set of elementsFromPoint for the document AND all the shadow roots
+   *
+  */
+  var allElements = Array.prototype.slice.call(document.getElementsByTagName('*'), 0);
+  var allShadowRoots = allElements.reduce(function (acc, el) {
+    if (el.shadowRoot) {
+      acc.push(el.shadowRoot);
+    }
+    return acc;
+  }, []);
+  var documentElementsFromPoint = document.elementsFromPoint(x, y);
+  var shadowRootElementsFromPoint = allShadowRoots.map(function (e) {
+    return e.elementsFromPoint(x, y);
+  }).flat();
+  return [].concat(_toConsumableArray(documentElementsFromPoint), _toConsumableArray(shadowRootElementsFromPoint));
+}.bind(typeof document !== 'undefined' ? document : null);
 var supportsPassive = function () {
   // simular to jQuery's test
   var supported = false;
@@ -326,8 +317,11 @@ var TouchBackend = /*#__PURE__*/function () {
         /**
          * Use the coordinates to grab the element the drag ended on.
          * If the element is the same as the target node (or any of it's children) then we have hit a drop target and can handle the move.
+         *
+         * Searching within the scope of it's root (either shadowRoot OR document)
          */
-        var droppedOn = document.elementFromPoint(coords.x, coords.y);
+        var elementRoot = node.getRootNode() === document ? document : node.getRootNode();
+        var droppedOn = elementRoot.elementFromPoint(coords.x, coords.y);
         var childMatch = node.contains(droppedOn);
         if (droppedOn === node || childMatch) {
           return _this3.handleMove(e, targetId);

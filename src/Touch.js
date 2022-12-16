@@ -59,36 +59,26 @@ function eventShouldEndDrag(e) {
     return e.buttons === undefined || (e.buttons & MouseButtons.Left) === 0;
 }
 
-// Polyfill for document.elementsFromPoint
-const elementsFromPoint = ((typeof document !== 'undefined' && document.elementsFromPoint) || function (x, y) {
-    if (document.msElementsFromPoint) {
-        // msElementsFromPoint is much faster but returns a node-list, so convert it to an array
-        const msElements = document.msElementsFromPoint(x, y);
-        return msElements && Array.prototype.slice.call(msElements, 0);
-    }
+const elementsFromPoint = (function (x, y) {
+    /*
+     * Instead of just getting document.elementsFromPoint
+     * Instead, find all the shadowroots inside the document
+     * and return the set of elementsFromPoint for the document AND all the shadow roots
+     *
+    */
+    const allElements = Array.prototype.slice.call(document.getElementsByTagName('*'), 0);
 
-    var elements = [], previousPointerEvents = [], current, i, d;
+    const allShadowRoots = allElements.reduce((acc, el) => {
+        if (el.shadowRoot) {
+            acc.push(el.shadowRoot);
+        }
+        return acc;
+    }, []);
 
-    // get all elements via elementFromPoint, and remove them from hit-testing in order
-    while ((current = document.elementFromPoint(x, y)) && elements.indexOf(current) === -1 && current !== null) {
-        // push the element and its current style
-        elements.push(current);
-        previousPointerEvents.push({
-            value: current.style.getPropertyValue('pointer-events'),
-            priority: current.style.getPropertyPriority('pointer-events')
-        });
+    const documentElementsFromPoint = document.elementsFromPoint(x, y);
+    const shadowRootElementsFromPoint = allShadowRoots.map(e => e.elementsFromPoint(x, y)).flat();
 
-        // add "pointer-events: none", to get to the underlying element
-        current.style.setProperty('pointer-events', 'none', 'important');
-    }
-
-    // restore the previous pointer-events values
-    for (i = previousPointerEvents.length; d=previousPointerEvents[--i]; ) {
-        elements[i].style.setProperty('pointer-events', d.value ? d.value: '', d.priority);
-    }
-
-    // return our results
-    return elements;
+    return [...documentElementsFromPoint, ...shadowRootElementsFromPoint];
 }).bind(typeof document !== 'undefined' ? document : null);
 
 const supportsPassive = (() => {
@@ -313,8 +303,11 @@ export class TouchBackend {
             /**
              * Use the coordinates to grab the element the drag ended on.
              * If the element is the same as the target node (or any of it's children) then we have hit a drop target and can handle the move.
+             *
+             * Searching within the scope of it's root (either shadowRoot OR document)
              */
-            let droppedOn = document.elementFromPoint(coords.x, coords.y);
+            let elementRoot = node.getRootNode() === document ? document : node.getRootNode();
+            let droppedOn = elementRoot.elementFromPoint(coords.x, coords.y);
             let childMatch = node.contains(droppedOn);
 
             if (droppedOn === node || childMatch) {
