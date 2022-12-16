@@ -1,32 +1,4 @@
 {
-  "_args": [
-    [
-      "react-dnd-touch-backend@0.5.2",
-      "/Users/aaronstrick/work/brilliant"
-    ]
-  ],
-  "_from": "react-dnd-touch-backend@0.5.2",
-  "_id": "react-dnd-touch-backend@0.5.2",
-  "_inBundle": false,
-  "_integrity": "sha512-d7Mgq2D5556Dq70l5ePU3RAY7HLGhioYIoGYan0IWGU3iEMFdpbhdKT4iPaYGNfCseo1610afF3yLvRacv5CLQ==",
-  "_location": "/react-dnd-touch-backend",
-  "_phantomChildren": {},
-  "_requested": {
-    "type": "version",
-    "registry": true,
-    "raw": "react-dnd-touch-backend@0.5.2",
-    "name": "react-dnd-touch-backend",
-    "escapedName": "react-dnd-touch-backend",
-    "rawSpec": "0.5.2",
-    "saveSpec": null,
-    "fetchSpec": "0.5.2"
-  },
-  "_requiredBy": [
-    "/"
-  ],
-  "_resolved": "https://registry.npmjs.org/react-dnd-touch-backend/-/react-dnd-touch-backend-0.5.2.tgz",
-  "_spec": "0.5.2",
-  "_where": "/Users/aaronstrick/work/brilliant",
   "author": {
     "name": "Long Ho",
     "email": "holevietlong@gmail.com"
@@ -66,7 +38,7 @@
     "rimraf": "^2.6.2",
     "semantic-release": "^15.9.16"
   },
-  "homepage": "https://github.com/yahoo/react-dnd-touch-backend#readme",
+  "homepage": "https://github.com/brilliantorg/react-dnd-touch-backend#readme",
   "keywords": [
     "react",
     "drag",
@@ -82,7 +54,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yahoo/react-dnd-touch-backend.git"
+    "url": "git+https://github.com/brilliantorg/react-dnd-touch-backend.git"
   },
   "scripts": {
     "clean": "rimraf dist/**/* examples/*.browserified.js",
