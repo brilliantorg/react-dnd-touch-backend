@@ -1,3 +1,33 @@
+# Brilliant "Fork" Information:
+
+## Background
+
+When bringing the Quantum Circuits over from V2 to V3, there were issues with it working inside of the ShadowDOM, since react-dnd-touch-backend did not properly handle the shadowDOM.
+
+See as background:
+
+- https://brilliant.atlassian.net/browse/LIX-1141
+- https://brilliant.atlassian.net/browse/LIX-1322
+- https://github.com/react-dnd/react-dnd/issues/3449
+
+Therefore, a fix needed to be made here, in touch-dnd-backend
+
+
+## Not Really A Fork
+
+Unforunately, we rely on version 0.5.2. Updating versions is incompatible with react-dnd - which led to a chain of having to update `react-dnd` -> `preact-dnd` -> `preact` itself. Things in that ecosystem had moved on past the point of feasibility to do this upgrade work in the timeline given. The entire API moved from Providers to Hooks, etc. etc.
+
+
+Notably also, the source code for this version was no longer hosted!! The initial project `react-dnd-touch-backend` was at the time part of the `yahoo/react-dnd-touch-backend`, but by the time of this "fork", the project was subsumed by `react-dnd` itself and the source code at the point was online.
+
+This repository was created by simply copying the source code __out of the node_modules__ directory in the main brilliant repo!!
+
+
+
+
+
+# Everything below is the original readme!
+
 <img src="https://avatars2.githubusercontent.com/u/6412038?v=3&s=200" alt="react logo" title="react" align="right" width="64" height="64" />
 
 # react-dnd-touch-backend
