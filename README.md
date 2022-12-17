@@ -10,6 +10,8 @@ See as background:
 - https://brilliant.atlassian.net/browse/LIX-1322
 - https://github.com/react-dnd/react-dnd/issues/3449
 
+- https://github.com/brilliantorg/brilliant/pull/17872
+
 Therefore, a fix needed to be made here, in touch-dnd-backend
 
 
